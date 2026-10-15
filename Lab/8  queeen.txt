@@ -1,0 +1,139 @@
+import heaps 
+
+# Goal state
+GOAL = (1, 2, 3,
+        4, 5, 6,
+        7, 8, 0)  # 0 represents the blank tile
+
+
+# Calculate Manhattan distance
+def heuristic(state):
+    distance = 0
+
+    for i, tile in enumerate(state):
+        if tile != 0:
+            goal_index = tile - 1
+            distance += abs(i // 3 - goal_index // 3)
+            distance += abs(i % 3 - goal_index % 3)
+
+    return distance
+
+
+# Generate possible next states
+def get_neighbors(state):
+    neighbors = []
+    blank = state.index(0)
+    row, col = blank // 3, blank % 3
+
+    moves = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    for dr, dc in moves:
+        new_row, new_col = row + dr, col + dc
+
+        if 0 <= new_row < 3 and 0 <= new_col < 3:
+            new_pos = new_row * 3 + new_col
+            new_state = list(state)
+
+            new_state[blank], new_state[new_pos] = (
+                new_state[new_pos], new_state[blank]
+            )
+
+            neighbors.append(tuple(new_state))
+
+    N = 8
+
+def print_board(board):
+    for row in board:
+        print(" ".join("Q" if cell else "." for cell in row))
+
+def is_safe(board, row, col):
+    # Check the same column in previous rows
+    for i in range(row):
+        if board[i][col] == 1:
+            return False
+
+    # Check upper-left diagonal
+    i, j = row - 1, col - 1
+    while i >= 0 and j >= 0:
+        if board[i][j] == 1:
+            return False
+        i -= 1
+        j -= 1
+
+    # Check upper-right diagonal
+    i, j = row - 1, col + 1
+    while i >= 0 and j < N:
+        if board[i][j] == 1:
+            return False
+        i -= 1
+        j += 1
+
+    return True
+
+def solve_queens(board, row):
+    # All 8 queens have been placed
+    if row == N:
+        return True
+
+    # Try placing a queen in each column
+    for col in range(N):
+        if is_safe(board, row, col):
+            board[row][col] = 1
+
+            if solve_queens(board, row + 1):
+                return True
+
+            # Backtrack if the placement fails
+            board[row][col] = 0
+
+    return False
+
+# Create an empty chessboard
+board = [[0 for _ in range(N)] for _ in range(N)]
+
+if solve_queens(board, 0):
+    print("Solution to the 8 Queens Problem:")
+    print_board(board)
+else:
+    print("No solution exists.")
+Sample output
+One possible solution is:
+
+text
+Solution to the 8 Queens Problem:
+Q . . . . . . .
+. . . . Q . . .
+. . . . . . . Q
+. . . . . Q . .
+. . Q . . . . .
+. . . . . . Q .
+. Q . . . . . .
+. . . Q . . . .
+Q represents a queen.
+
+. represents an empty square.
+
+How the program works
+Initialize: Create an empty 8×8 chessboard.
+
+Place a queen: Try placing a queen in each column of the current row.
+
+Check safety: Ensure no queen attacks the new queen vertically or diagonally. Since queens are placed row by row, checking previous rows is sufficient.
+
+Backtrack: If no valid arrangement can be completed, remove the queen and try another column.
+
+Finish: When all 8 queens are placed safely, print the solution.
+
+Time complexity: The worst-case search is bounded by 
+O
+(
+N
+!
+)
+O(N!) with pruning, where 
+N
+=
+8
+N=8.
+
+This program prints one valid solution. ♟️
